@@ -1,0 +1,17 @@
+name: FramedImage
+version: '${version}'
+main: ru.cakemc.framedimage.FramedImage
+api-version: 1.13
+
+commands:
+  fi: {}
+
+permissions:
+  framedimage.command:
+    default: op
+  framedimage.subcommand.create:
+    default: op
+  framedimage.subcommand.remove:
+    default: op
+  framedimage.subcommand.reload:
+    default: op
