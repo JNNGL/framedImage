@@ -24,9 +24,11 @@ import com.jnngl.mapcolor.palette.Palette;
 import io.netty.channel.Channel;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import ru.cakemc.framedimage.command.FiCommand;
 import ru.cakemc.framedimage.config.Config;
 import ru.cakemc.framedimage.config.Frames;
@@ -34,15 +36,16 @@ import ru.cakemc.framedimage.config.Messages;
 import ru.cakemc.framedimage.injection.Injector;
 import ru.cakemc.framedimage.listener.PlayerListener;
 import ru.cakemc.framedimage.listener.HandshakeListener;
+import ru.cakemc.framedimage.protocol.Packet;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public final class FramedImage extends JavaPlugin {
 
@@ -50,9 +53,10 @@ public final class FramedImage extends JavaPlugin {
   private final File configFile = new File(getDataFolder(), "config.yml");
   private final File messagesFile = new File(getDataFolder(), "messages.yml");
   private final File framesFile = new File(getDataFolder(), "frames.yml");
-  private final Map<String, Channel> playerChannels = new HashMap<>();
-  private final Map<String, List<FrameDisplay>> displays = new ConcurrentHashMap<>();
-  private final Map<Palette, ColorMatcher> colorMatchers = new HashMap<>();
+  private final Map<String, Channel> playerChannels = Collections.synchronizedMap(new HashMap<>());
+  private final Map<String, List<FrameDisplay>> displays = Collections.synchronizedMap(new HashMap<>());
+  private final Map<Palette, ColorMatcher> colorMatchers = Collections.synchronizedMap(new HashMap<>());
+  private final Map<FrameDisplay, BukkitTask> updatableDisplays = Collections.synchronizedMap(new HashMap<>());
 
   @Override
   public void onEnable() {
@@ -94,10 +98,24 @@ public final class FramedImage extends JavaPlugin {
     return displays;
   }
 
+  public void displayNextFrame(FrameDisplay display) {
+    World world = display.getLocation().getWorld();
+    List<Player> players = world.getPlayers();
+    List<Packet> packets = display.getNextFramePackets();
+    players.forEach(player -> {
+      Channel channel = getPlayerChannel(player);
+      if (channel != null) {
+        packets.forEach(channel::write);
+        channel.flush();
+      }
+    });
+  }
+
   public void spawn(FrameDisplay display, Player player) {
     Channel channel = getPlayerChannel(player);
     if (channel != null) {
       display.getSpawnPackets().forEach(channel::write);
+      display.getNextFramePackets().forEach(channel::write);
       channel.flush();
     }
   }
@@ -106,6 +124,17 @@ public final class FramedImage extends JavaPlugin {
     World world = display.getLocation().getWorld();
     List<Player> players = world.getPlayers();
     players.forEach(player -> spawn(display, player));
+
+    if (display.getNumFrames() > 1) {
+      updatableDisplays.put(
+          display,
+          Bukkit.getScheduler().runTaskTimerAsynchronously(
+              this,
+              () -> displayNextFrame(display),
+              1L, 1L
+          )
+      );
+    }
   }
 
   public void spawn(Player player) {
@@ -125,6 +154,12 @@ public final class FramedImage extends JavaPlugin {
   }
 
   public void destroy(FrameDisplay display) {
+    BukkitTask updater = updatableDisplays.get(display);
+    if (updater != null) {
+      updater.cancel();
+      updatableDisplays.remove(display);
+    }
+
     World world = display.getLocation().getWorld();
     List<Player> players = world.getPlayers();
     players.forEach(player -> destroy(display, player));

@@ -32,9 +32,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class FrameDisplay {
 
@@ -47,14 +49,19 @@ public class FrameDisplay {
   };
 
   private static int EID_COUNTER = 0;
+  private static int MAP_COUNTER = 0;
 
+  private final List<List<Packet>> framePackets;
+  private final List<Packet> spawnPackets = new ArrayList<>();
+  private final List<Packet> destroyPackets = new ArrayList<>();
   private final Location location;
   private final BlockFace face;
   private final BlockFace offsetFace;
   private final int width;
   private final int height;
-  private final BufferedImage image;
+  private final List<BufferedImage> frames;
   private final UUID uuid;
+  private Iterator<List<Packet>> framePacketsIterator;
 
   private static BufferedImage resizeIfNeeded(BufferedImage image, int width, int height) {
      if (image.getWidth() != width || image.getHeight() != height) {
@@ -70,32 +77,28 @@ public class FrameDisplay {
      }
   }
 
-  private final List<Packet> spawnPackets = new ArrayList<>();
-  private final List<Packet> destroyPackets = new ArrayList<>();
-
   public FrameDisplay(FramedImage plugin, Location location, BlockFace face,
-                      int width, int height, BufferedImage image, UUID uuid) {
+                      int width, int height, List<BufferedImage> frames, UUID uuid) {
     this.location = location;
     this.face = face;
     this.width = width;
     this.height = height;
-    this.image = image;
+    this.frames = frames;
     this.uuid = uuid;
 
-    image = resizeIfNeeded(image, width * 128, height * 128);
+    frames = frames.stream()
+        .map(image -> resizeIfNeeded(image, width * 128, height * 128))
+        .collect(Collectors.toList());
+
+    framePackets = frames.stream()
+        .map(frame -> new ArrayList<Packet>())
+        .collect(Collectors.toList());
 
     offsetFace = OFFSET_FACES[face.ordinal()];
     Facing facing = FACINGS[face.ordinal()];
 
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
-        BufferedImage part = image.getSubimage(x * 128, (height - 1 - y) * 128, 128, 128);
-
-        Map<Palette, byte[]> data = new HashMap<>();
-        for (Palette palette : Palette.ALL_PALETTES) {
-          data.put(palette, plugin.getColorMatchers().get(palette).matchImage(part));
-        }
-
         int blockX = location.getBlockX() + offsetFace.getModX() * x;
         int blockY = location.getBlockY() + y;
         int blockZ = location.getBlockZ() + offsetFace.getModZ() * x;
@@ -114,19 +117,45 @@ public class FrameDisplay {
             )
         );
 
-        spawnPackets.add(new SetMetadata(eid,
-            version -> ItemFrame.createMapMetadata(version, eid)));
+        for (int i = 0; i < frames.size(); i++) {
+          BufferedImage frame = frames.get(i);
+          BufferedImage part = frame.getSubimage(x * 128, (height - 1 - y) * 128, 128, 128);
 
-        spawnPackets.add(new MapData(eid, (byte) 0, data));
+          int mapId = --MAP_COUNTER;
+
+          Map<Palette, byte[]> data = new HashMap<>();
+          for (Palette palette : Palette.ALL_PALETTES) {
+            data.put(palette, plugin.getColorMatchers().get(palette).matchImage(part));
+          }
+
+          spawnPackets.add(new MapData(mapId, (byte) 0, data));
+          framePackets.get(i).add(new SetMetadata(eid, version -> ItemFrame.createMapMetadata(version, mapId)));
+        }
 
         destroyPackets.add(new DestroyEntity(eid));
       }
     }
+
+    framePacketsIterator = framePackets.iterator();
   }
 
   public FrameDisplay(FramedImage plugin, Location location, BlockFace face,
-                      int width, int height, BufferedImage image) {
-    this(plugin, location, face, width, height, image, UUID.randomUUID());
+                      int width, int height, List<BufferedImage> frames) {
+    this(plugin, location, face, width, height, frames, UUID.randomUUID());
+  }
+
+  public List<Packet> getNextFramePackets() {
+    synchronized (framePackets) {
+      if (!framePacketsIterator.hasNext()) {
+        framePacketsIterator = framePackets.iterator();
+      }
+
+      return framePacketsIterator.next();
+    }
+  }
+
+  public int getNumFrames() {
+    return frames.size();
   }
 
   public Location getLocation() {
@@ -149,8 +178,8 @@ public class FrameDisplay {
     return height;
   }
 
-  public BufferedImage getImage() {
-    return image;
+  public List<BufferedImage> getFrames() {
+    return frames;
   }
 
   public UUID getUUID() {

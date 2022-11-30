@@ -18,6 +18,7 @@
 package ru.cakemc.framedimage.command.fi;
 
 import net.elytrium.java.commons.config.Placeholders;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -29,10 +30,9 @@ import ru.cakemc.framedimage.FramedImage;
 import ru.cakemc.framedimage.command.SubCommand;
 import ru.cakemc.framedimage.config.Messages;
 import ru.cakemc.framedimage.util.BlockUtil;
+import ru.cakemc.framedimage.util.ImageUtil;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.net.URL;
 import java.util.List;
 
 public class CreateSubcommand implements SubCommand {
@@ -64,7 +64,7 @@ public class CreateSubcommand implements SubCommand {
 
     int width = Integer.parseInt(args.get(0));
     int height = Integer.parseInt(args.get(1));
-    String url = args.get(2);
+    String urlString = args.get(2);
 
     if (width <= 0 || height <= 0) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.CREATE.INVALID_ARGUMENTS);
@@ -80,11 +80,13 @@ public class CreateSubcommand implements SubCommand {
     }
 
     Location location = BlockUtil.getNextBlockLocation(block.getLocation(), blockFace);
-    BufferedImage image = ImageIO.read(new URL(url));
 
-    FrameDisplay frameDisplay = new FrameDisplay(plugin, location, blockFace, width, height, image);
-    plugin.add(frameDisplay);
-    plugin.saveFrames();
+    List<BufferedImage> frames = ImageUtil.readFrames(urlString);
+    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+      FrameDisplay frameDisplay = new FrameDisplay(plugin, location, blockFace, width, height, frames);
+      plugin.add(frameDisplay);
+      plugin.saveFrames();
+    });
 
     return true;
   }

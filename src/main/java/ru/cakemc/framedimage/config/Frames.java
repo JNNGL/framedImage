@@ -30,7 +30,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -51,7 +54,8 @@ public class Frames extends YamlConfig {
     public int WIDTH;
     public int HEIGHT;
     public String FACE;
-    public String IMAGE;
+    public String IMAGE = ""; // For backward compatibility
+    public List<String> FRAMES;
 
     public FrameNode(FrameDisplay display, File dataFolder) throws IOException {
       Location location = display.getLocation();
@@ -62,16 +66,19 @@ public class Frames extends YamlConfig {
       WIDTH = display.getWidth();
       HEIGHT = display.getHeight();
       FACE = display.getFace().toString();
+      FRAMES = new ArrayList<>();
 
-      Path path = Path.of(dataFolder.getPath(), "images/" + display.getUUID() + ".png");
-      File file = path.toFile();
+      for (int i = 0; i < display.getNumFrames(); i++) {
+        Path path = Path.of(dataFolder.getPath(), "images/" + display.getUUID() + "_" + i + ".png");
+        File file = path.toFile();
 
-      if (Files.notExists(path)) {
-        Files.createDirectories(path.getParent());
-        ImageIO.write(display.getImage(), "PNG", file);
+        if (Files.notExists(path)) {
+          Files.createDirectories(path.getParent());
+          ImageIO.write(display.getFrames().get(i), "PNG", file);
+        }
+
+        FRAMES.add(file.getPath());
       }
-
-      IMAGE = file.getPath();
     }
 
     public FrameNode() {
@@ -86,8 +93,17 @@ public class Frames extends YamlConfig {
 
       BlockFace face = BlockFace.valueOf(FACE);
 
-      BufferedImage image = ImageIO.read(new File(IMAGE));
-      return new FrameDisplay(plugin, location, face, WIDTH, HEIGHT, image, uuid);
+      List<BufferedImage> frames;
+      if (IMAGE != null && !IMAGE.isBlank()) {
+        frames = Collections.singletonList(ImageIO.read(new File(IMAGE)));
+      } else {
+        frames = new ArrayList<>();
+        for (String frame : FRAMES) {
+          frames.add(ImageIO.read(new File(frame)));
+        }
+      }
+
+      return new FrameDisplay(plugin, location, face, WIDTH, HEIGHT, frames, uuid);
     }
   }
 }
