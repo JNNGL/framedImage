@@ -17,6 +17,7 @@
 
 package ru.cakemc.framedimage.protocol.data;
 
+import ru.cakemc.framedimage.protocol.IdMapping;
 import ru.cakemc.framedimage.protocol.MinecraftVersion;
 import ru.cakemc.framedimage.protocol.data.nbt.TagCompound;
 import ru.cakemc.framedimage.protocol.data.nbt.TagInt;
@@ -26,36 +27,32 @@ import java.util.Map;
 
 public class ItemFrame {
 
+  private static final IdMapping ID_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 71)
+          .add(MinecraftVersion.MINECRAFT_1_14, 35)
+          .add(MinecraftVersion.MINECRAFT_1_15, 36)
+          .add(MinecraftVersion.MINECRAFT_1_16, 38)
+          .add(MinecraftVersion.MINECRAFT_1_17, 42)
+          .add(MinecraftVersion.MINECRAFT_1_19, 45)
+          .build();
+
+  private static final IdMapping METADATA_INDEX_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 2)
+          .add(MinecraftVersion.MINECRAFT_1_8, 8)
+          .add(MinecraftVersion.MINECRAFT_1_9, 5)
+          .add(MinecraftVersion.MINECRAFT_1_10, 6)
+          .add(MinecraftVersion.MINECRAFT_1_14, 7)
+          .add(MinecraftVersion.MINECRAFT_1_17, 8)
+          .build();
+
   public static int getID(MinecraftVersion protocolVersion) {
-    if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_13_2) <= 0) {
-      return 71;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_14_4) <= 0) {
-      return 35;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_15_2) <= 0) {
-      return 36;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_16_4) <= 0) {
-      return 38;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_18_2) <= 0) {
-      return 42;
-    } else {
-      return 45;
-    }
+    return ID_MAPPING.getID(protocolVersion);
   }
 
   public static byte getMetadataIndex(MinecraftVersion protocolVersion) {
-    if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_7_6) <= 0) {
-      return 2;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_8) <= 0) {
-      return 8;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_9_4) <= 0) {
-      return 5;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_13_2) <= 0) {
-      return 6;
-    } else if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_16_4) <= 0) {
-      return 7;
-    } else {
-      return 8;
-    }
+    return (byte) METADATA_INDEX_MAPPING.getID(protocolVersion);
   }
 
   public static EntityMetadata createMapMetadata(MinecraftVersion protocolVersion, int mapId) {

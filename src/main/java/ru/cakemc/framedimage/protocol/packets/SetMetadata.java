@@ -20,12 +20,25 @@ package ru.cakemc.framedimage.protocol.packets;
 import io.netty.buffer.ByteBuf;
 import ru.cakemc.framedimage.protocol.MinecraftVersion;
 import ru.cakemc.framedimage.protocol.Packet;
+import ru.cakemc.framedimage.protocol.IdMapping;
 import ru.cakemc.framedimage.protocol.ProtocolUtils;
 import ru.cakemc.framedimage.protocol.data.EntityMetadata;
 
 import java.util.function.Function;
 
 public class SetMetadata implements Packet {
+
+  private static final IdMapping ID_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 0x1C)
+          .add(MinecraftVersion.MINECRAFT_1_9, 0x39)
+          .add(MinecraftVersion.MINECRAFT_1_12, 0x3B)
+          .add(MinecraftVersion.MINECRAFT_1_12_1, 0x3C)
+          .add(MinecraftVersion.MINECRAFT_1_14, 0x43)
+          .add(MinecraftVersion.MINECRAFT_1_15, 0x44)
+          .add(MinecraftVersion.MINECRAFT_1_17, 0x4D)
+          .add(MinecraftVersion.MINECRAFT_1_19_1, 0x50)
+          .build();
 
   private final int entityId;
   private final Function<MinecraftVersion, EntityMetadata> metadata;
@@ -47,24 +60,6 @@ public class SetMetadata implements Packet {
 
   @Override
   public int getID(MinecraftVersion version) {
-    if (version.compareTo(MinecraftVersion.MINECRAFT_1_19_1) >= 0) {
-      return 0x50;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_17) >= 0) {
-      return 0x4D;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_15) >= 0) {
-      return 0x44;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_14) >= 0) {
-      return 0x43;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_13) >= 0) {
-      return 0x3F;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_12_1) >= 0) {
-      return 0x3C;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_12) >= 0) {
-      return 0x3B;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_9) >= 0) {
-      return 0x39;
-    } else {
-      return 0x1C;
-    }
+    return ID_MAPPING.getID(version);
   }
 }

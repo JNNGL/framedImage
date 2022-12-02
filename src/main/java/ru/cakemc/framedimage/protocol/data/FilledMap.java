@@ -17,26 +17,24 @@
 
 package ru.cakemc.framedimage.protocol.data;
 
+import ru.cakemc.framedimage.protocol.IdMapping;
 import ru.cakemc.framedimage.protocol.MinecraftVersion;
 
 public class FilledMap {
 
+  private static final IdMapping ID_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 358)
+          .add(MinecraftVersion.MINECRAFT_1_13, 608)
+          .add(MinecraftVersion.MINECRAFT_1_13_2, 613)
+          .add(MinecraftVersion.MINECRAFT_1_14, 671)
+          .add(MinecraftVersion.MINECRAFT_1_16, 733)
+          .add(MinecraftVersion.MINECRAFT_1_17, 847)
+          .add(MinecraftVersion.MINECRAFT_1_19, 886)
+          .build();
+
   public static int getID(MinecraftVersion version) {
-    if (version.compareTo(MinecraftVersion.MINECRAFT_1_19) >= 0) {
-      return 886;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_17) >= 0) {
-      return 847;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_16) >= 0) {
-      return 733;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_14) >= 0) {
-      return 671;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_13_2) >= 0) {
-      return 613;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_13) >= 0) {
-      return 608;
-    } else {
-      return 358;
-    }
+    return ID_MAPPING.getID(version);
   }
 
 }

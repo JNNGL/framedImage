@@ -20,9 +20,25 @@ package ru.cakemc.framedimage.protocol.packets;
 import io.netty.buffer.ByteBuf;
 import ru.cakemc.framedimage.protocol.MinecraftVersion;
 import ru.cakemc.framedimage.protocol.Packet;
+import ru.cakemc.framedimage.protocol.IdMapping;
 import ru.cakemc.framedimage.protocol.ProtocolUtils;
 
 public class DestroyEntity implements Packet {
+
+  private static final IdMapping ID_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 0x13)
+          .add(MinecraftVersion.MINECRAFT_1_9, 0x30)
+          .add(MinecraftVersion.MINECRAFT_1_12, 0x31)
+          .add(MinecraftVersion.MINECRAFT_1_12_1, 0x32)
+          .add(MinecraftVersion.MINECRAFT_1_13, 0x35)
+          .add(MinecraftVersion.MINECRAFT_1_14, 0x37)
+          .add(MinecraftVersion.MINECRAFT_1_15, 0x38)
+          .add(MinecraftVersion.MINECRAFT_1_16, 0x36)
+          .add(MinecraftVersion.MINECRAFT_1_17, 0x3A)
+          .add(MinecraftVersion.MINECRAFT_1_19, 0x38)
+          .add(MinecraftVersion.MINECRAFT_1_19_1, 0x3B)
+          .build();
 
   private final int entity;
 
@@ -45,28 +61,6 @@ public class DestroyEntity implements Packet {
 
   @Override
   public int getID(MinecraftVersion version) {
-    if (version.compareTo(MinecraftVersion.MINECRAFT_1_19_1) >= 0) {
-      return 0x3B;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_19) >= 0) {
-      return 0x38;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_17) >= 0) {
-      return 0x3A;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_16) >= 0) {
-      return 0x36;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_15) >= 0) {
-      return 0x38;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_14) >= 0) {
-      return 0x37;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_13) >= 0) {
-      return 0x35;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_12_1) >= 0) {
-      return 0x32;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_12) >= 0) {
-      return 0x31;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_9) >= 0) {
-      return 0x30;
-    } else {
-      return 0x13;
-    }
+    return ID_MAPPING.getID(version);
   }
 }

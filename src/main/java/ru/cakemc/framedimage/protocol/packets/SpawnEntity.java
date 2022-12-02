@@ -18,6 +18,7 @@
 package ru.cakemc.framedimage.protocol.packets;
 
 import io.netty.buffer.ByteBuf;
+import ru.cakemc.framedimage.protocol.IdMapping;
 import ru.cakemc.framedimage.protocol.MinecraftVersion;
 import ru.cakemc.framedimage.protocol.Packet;
 import ru.cakemc.framedimage.protocol.ProtocolUtils;
@@ -26,6 +27,12 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class SpawnEntity implements Packet {
+
+  private static final IdMapping ID_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 0x0E)
+          .add(MinecraftVersion.MINECRAFT_1_9, 0x00)
+          .build();
 
   private final int id;
   private final UUID uuid;
@@ -93,10 +100,6 @@ public class SpawnEntity implements Packet {
 
   @Override
   public int getID(MinecraftVersion version) {
-    if (version.compareTo(MinecraftVersion.MINECRAFT_1_9) >= 0) {
-      return 0x00;
-    } else {
-      return 0x0E;
-    }
+    return ID_MAPPING.getID(version);
   }
 }

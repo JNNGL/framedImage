@@ -21,12 +21,25 @@ import com.jnngl.mapcolor.palette.Palette;
 import io.netty.buffer.ByteBuf;
 import ru.cakemc.framedimage.protocol.MinecraftVersion;
 import ru.cakemc.framedimage.protocol.Packet;
+import ru.cakemc.framedimage.protocol.IdMapping;
 import ru.cakemc.framedimage.protocol.ProtocolUtils;
 
 import java.util.Map;
 
 public class MapData implements Packet {
 
+  private static final IdMapping ID_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 0x34)
+          .add(MinecraftVersion.MINECRAFT_1_9, 0x24)
+          .add(MinecraftVersion.MINECRAFT_1_13, 0x26)
+          .add(MinecraftVersion.MINECRAFT_1_15, 0x27)
+          .add(MinecraftVersion.MINECRAFT_1_16, 0x26)
+          .add(MinecraftVersion.MINECRAFT_1_16_2, 0x25)
+          .add(MinecraftVersion.MINECRAFT_1_17, 0x27)
+          .add(MinecraftVersion.MINECRAFT_1_19, 0x24)
+          .add(MinecraftVersion.MINECRAFT_1_19_1, 0x26)
+          .build();
   private final int mapID;
   private final byte scale;
   private final int columns;
@@ -94,24 +107,6 @@ public class MapData implements Packet {
 
   @Override
   public int getID(MinecraftVersion version) {
-    if (version.compareTo(MinecraftVersion.MINECRAFT_1_19_1) >= 0) {
-      return 0x26;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_19) >= 0) {
-      return 0x24;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_17) >= 0) {
-      return 0x27;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_16_2) >= 0) {
-      return 0x25;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_16) >= 0) {
-      return 0x26;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_15) >= 0) {
-      return 0x27;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_13) >= 0) {
-      return 0x26;
-    } else if (version.compareTo(MinecraftVersion.MINECRAFT_1_9) >= 0) {
-      return 0x24;
-    } else {
-      return 0x34;
-    }
+    return ID_MAPPING.getID(version);
   }
 }
