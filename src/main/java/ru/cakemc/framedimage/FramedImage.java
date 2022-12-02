@@ -25,6 +25,7 @@ import io.netty.channel.Channel;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -177,7 +178,9 @@ public final class FramedImage extends JavaPlugin {
     displays.computeIfAbsent(world.getName(), k -> new ArrayList<>()).add(display);
 
     try {
-      Frames.IMP.FRAMES.put(display.getUUID().toString(), new Frames.FrameNode(display, getDataFolder()));
+      synchronized (Frames.IMP.MUTEX) {
+        Frames.IMP.FRAMES.put(display.getUUID().toString(), new Frames.FrameNode(display, getDataFolder()));
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -187,13 +190,19 @@ public final class FramedImage extends JavaPlugin {
     destroy(display);
     World world = display.getLocation().getWorld();
     displays.get(world.getName()).remove(display);
-    Frames.IMP.FRAMES.remove(display.getUUID().toString());
+
+    synchronized (Frames.IMP.MUTEX) {
+      Frames.IMP.FRAMES.remove(display.getUUID().toString());
+    }
   }
 
   public void removeAll() {
     destroyAll();
     displays.clear();
-    Frames.IMP.FRAMES.clear();
+
+    synchronized (Frames.IMP.MUTEX) {
+      Frames.IMP.FRAMES.clear();
+    }
   }
 
   public void saveFrames() {
@@ -216,17 +225,19 @@ public final class FramedImage extends JavaPlugin {
       );
     }
 
-    getLogger().info("Loading " + Frames.IMP.FRAMES.size() + " images.");
+    synchronized (Frames.IMP.MUTEX) {
+      getLogger().info("Loading " + Frames.IMP.FRAMES.size() + " images.");
 
-    Frames.IMP.FRAMES.forEach(
-        (uuid, node) -> {
-          try {
-            add(node.createFrameDisplay(this, UUID.fromString(uuid)));
-          } catch (IOException e) {
-            throw new RuntimeException(e);
+      Frames.IMP.FRAMES.forEach(
+          (uuid, node) -> {
+            try {
+              add(node.createFrameDisplay(this, UUID.fromString(uuid)));
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
           }
-        }
-    );
+      );
+    }
 
     saveFrames();
   }
