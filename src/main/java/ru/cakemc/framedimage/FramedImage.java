@@ -42,6 +42,7 @@ import ru.cakemc.framedimage.protocol.Packet;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -99,8 +100,8 @@ public final class FramedImage extends JavaPlugin {
   }
 
   public void displayNextFrame(FrameDisplay display) {
-    World world = display.getLocation().getWorld();
-    List<Player> players = world.getPlayers();
+    Location location = display.getLocation();
+    Collection<Player> players = location.getNearbyPlayers(256);
     List<Packet> packets = display.getNextFramePackets();
     players.forEach(player -> {
       Channel channel = getPlayerChannel(player);
