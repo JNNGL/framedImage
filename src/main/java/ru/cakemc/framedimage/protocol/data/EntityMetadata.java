@@ -77,7 +77,7 @@ public class EntityMetadata {
         }
         buf.writeByte(count);
         if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_13) < 0) {
-          buf.writeShort(data);
+          buf.writeShort(data & ~Short.MIN_VALUE);
         }
 
         if (nbt == null) {

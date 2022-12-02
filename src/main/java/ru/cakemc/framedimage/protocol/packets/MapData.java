@@ -70,7 +70,12 @@ public class MapData implements Packet {
   public void encode(ByteBuf buf, MinecraftVersion version) {
     byte[] data = this.data.get(Palette.getPaletteForProtocol(version.getProtocolVersion()));
 
-    ProtocolUtils.writeVarInt(buf, this.mapID);
+    if (version.compareTo(MinecraftVersion.MINECRAFT_1_12_2) <= 0) {
+      ProtocolUtils.writeVarInt(buf, mapID & ~Short.MIN_VALUE);
+    } else {
+      ProtocolUtils.writeVarInt(buf, mapID);
+    }
+
     if (version.compareTo(MinecraftVersion.MINECRAFT_1_8) < 0) {
       buf.writeShort(data.length + 3);
       buf.writeByte(0);
