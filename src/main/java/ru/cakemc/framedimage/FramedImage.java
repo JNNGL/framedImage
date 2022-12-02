@@ -154,10 +154,9 @@ public final class FramedImage extends JavaPlugin {
   }
 
   public void destroy(FrameDisplay display) {
-    BukkitTask updater = updatableDisplays.get(display);
+    BukkitTask updater = updatableDisplays.remove(display);
     if (updater != null) {
       updater.cancel();
-      updatableDisplays.remove(display);
     }
 
     World world = display.getLocation().getWorld();
