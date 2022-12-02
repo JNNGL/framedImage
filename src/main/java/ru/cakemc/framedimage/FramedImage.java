@@ -41,11 +41,10 @@ import ru.cakemc.framedimage.protocol.Packet;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class FramedImage extends JavaPlugin {
 
@@ -53,10 +52,10 @@ public final class FramedImage extends JavaPlugin {
   private final File configFile = new File(getDataFolder(), "config.yml");
   private final File messagesFile = new File(getDataFolder(), "messages.yml");
   private final File framesFile = new File(getDataFolder(), "frames.yml");
-  private final Map<String, Channel> playerChannels = Collections.synchronizedMap(new HashMap<>());
-  private final Map<String, List<FrameDisplay>> displays = Collections.synchronizedMap(new HashMap<>());
-  private final Map<Palette, ColorMatcher> colorMatchers = Collections.synchronizedMap(new HashMap<>());
-  private final Map<FrameDisplay, BukkitTask> updatableDisplays = Collections.synchronizedMap(new HashMap<>());
+  private final Map<String, Channel> playerChannels = new ConcurrentHashMap<>();
+  private final Map<String, List<FrameDisplay>> displays = new ConcurrentHashMap<>();
+  private final Map<Palette, ColorMatcher> colorMatchers = new ConcurrentHashMap<>();
+  private final Map<FrameDisplay, BukkitTask> updatableDisplays = new ConcurrentHashMap<>();
 
   @Override
   public void onEnable() {
