@@ -40,13 +40,16 @@ public class PlayerListener implements Listener {
   public void onJoin(PlayerJoinEvent event) {
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       Channel channel = plugin.getPlayerChannel(event.getPlayer());
-      if (channel.pipeline().get("compress") != null) {
-        ChannelHandler handler = channel.pipeline().get("framedimage:encoder");
-        channel.pipeline().remove(handler);
-        channel.pipeline().addAfter("compress", "framedimage:encoder", handler);
-      }
 
-      plugin.spawn(event.getPlayer());
+      if (channel != null) {
+        if (channel.pipeline().get("compress") != null) {
+          ChannelHandler handler = channel.pipeline().get("framedimage:encoder");
+          channel.pipeline().remove(handler);
+          channel.pipeline().addAfter("compress", "framedimage:encoder", handler);
+        }
+
+        plugin.spawn(event.getPlayer());
+      }
     }, 10L);
   }
 
