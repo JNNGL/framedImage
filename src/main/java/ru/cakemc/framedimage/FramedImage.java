@@ -129,7 +129,7 @@ public final class FramedImage extends JavaPlugin {
     if (display.getNumFrames() > 1) {
       updatableDisplays.put(
           display,
-          Bukkit.getScheduler().runTaskTimerAsynchronously(
+          Bukkit.getScheduler().runTaskTimer(
               this,
               () -> displayNextFrame(display),
               1L, 1L
