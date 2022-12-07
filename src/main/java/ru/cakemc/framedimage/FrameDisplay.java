@@ -20,6 +20,7 @@ package ru.cakemc.framedimage;
 import com.jnngl.mapcolor.palette.Palette;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
+import ru.cakemc.framedimage.config.Config;
 import ru.cakemc.framedimage.protocol.Packet;
 import ru.cakemc.framedimage.protocol.data.Facing;
 import ru.cakemc.framedimage.protocol.data.ItemFrame;
@@ -109,7 +110,9 @@ public class FrameDisplay {
             new SpawnEntity(
                 eid,
                 UUID.randomUUID(),
-                ItemFrame::getID,
+                Config.IMP.GLOW
+                    ? ItemFrame::getGlowingID
+                    : ItemFrame::getID,
                 blockX, blockY, blockZ,
                 0, facing.getYaw(), 0,
                 facing::getID,

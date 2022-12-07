@@ -37,6 +37,16 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_19, 45)
           .build();
 
+  private static final IdMapping GLOWING_ID_MAPPING =
+      new IdMapping()
+          .add(MinecraftVersion.MINIMUM_VERSION, 71)
+          .add(MinecraftVersion.MINECRAFT_1_14, 35)
+          .add(MinecraftVersion.MINECRAFT_1_15, 36)
+          .add(MinecraftVersion.MINECRAFT_1_16, 38)
+          .add(MinecraftVersion.MINECRAFT_1_17, 32)
+          .add(MinecraftVersion.MINECRAFT_1_19, 35)
+          .build();
+
   private static final IdMapping METADATA_INDEX_MAPPING =
       new IdMapping()
           .add(MinecraftVersion.MINIMUM_VERSION, 2)
@@ -49,6 +59,10 @@ public class ItemFrame {
 
   public static int getID(MinecraftVersion protocolVersion) {
     return ID_MAPPING.getID(protocolVersion);
+  }
+
+  public static int getGlowingID(MinecraftVersion protocolVersion) {
+    return GLOWING_ID_MAPPING.getID(protocolVersion);
   }
 
   public static byte getMetadataIndex(MinecraftVersion protocolVersion) {
