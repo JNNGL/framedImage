@@ -77,6 +77,7 @@ public final class FramedImage extends JavaPlugin {
 
     Metrics metrics = new Metrics(this, 16966);
     metrics.addCustomChart(new SimplePie("dithering", () -> String.valueOf(Config.IMP.DITHERING)));
+    metrics.addCustomChart(new SimplePie("glow", () -> String.valueOf(Config.IMP.GLOW)));
   }
 
   @Override
