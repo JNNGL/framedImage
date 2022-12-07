@@ -22,6 +22,7 @@ import com.jnngl.mapcolor.matchers.BufferedImageMatcher;
 import com.jnngl.mapcolor.matchers.CachedColorMatcher;
 import com.jnngl.mapcolor.palette.Palette;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
@@ -43,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +62,7 @@ public final class FramedImage extends JavaPlugin {
   private final Map<Palette, ColorMatcher> colorMatchers = new ConcurrentHashMap<>();
   private final Map<FrameDisplay, BukkitTask> updatableDisplays = new ConcurrentHashMap<>();
   private final Set<String> loggingPlayers = ConcurrentHashMap.newKeySet();
+  private String encoderContext = null;
 
   @Override
   public void onEnable() {
@@ -106,6 +109,21 @@ public final class FramedImage extends JavaPlugin {
     return loggingPlayers;
   }
 
+  public void writePacket(Channel channel, Packet packet) {
+    if (encoderContext == null) {
+      Iterator<Map.Entry<String, ChannelHandler>> handlerIterator = channel.pipeline().iterator();
+      do {
+        if (!handlerIterator.hasNext()) {
+          throw new IllegalStateException("Couldn't find encoder handler.");
+        }
+      } while (!handlerIterator.next().getKey().equals("framedimage:encoder"));
+
+      encoderContext = handlerIterator.next().getKey();
+    }
+
+    channel.pipeline().context(encoderContext).write(packet);
+  }
+
   public void displayNextFrame(FrameDisplay display) {
     Location location = display.getLocation();
     Collection<Player> players = location.getNearbyPlayers(256);
@@ -114,7 +132,7 @@ public final class FramedImage extends JavaPlugin {
       if (!loggingPlayers.contains(player.getName())) {
         Channel channel = getPlayerChannel(player);
         if (channel != null) {
-          packets.forEach(channel::write);
+          packets.forEach(packet -> writePacket(channel, packet));
           channel.flush();
         }
       }
@@ -124,8 +142,8 @@ public final class FramedImage extends JavaPlugin {
   public void spawn(FrameDisplay display, Player player) {
     Channel channel = getPlayerChannel(player);
     if (channel != null) {
-      display.getSpawnPackets().forEach(channel::write);
-      display.getNextFramePackets().forEach(channel::write);
+      display.getSpawnPackets().forEach(packet -> writePacket(channel, packet));
+      display.getNextFramePackets().forEach(packet -> writePacket(channel, packet));
       channel.flush();
     }
   }
@@ -158,7 +176,7 @@ public final class FramedImage extends JavaPlugin {
   public void destroy(FrameDisplay display, Player player) {
     Channel channel = getPlayerChannel(player);
     if (channel != null) {
-      display.getDestroyPackets().forEach(channel::write);
+      display.getDestroyPackets().forEach(packet -> writePacket(channel, packet));
       channel.flush();
     }
   }
