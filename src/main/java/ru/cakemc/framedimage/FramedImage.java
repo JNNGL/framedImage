@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,6 +59,7 @@ public final class FramedImage extends JavaPlugin {
   private final Map<String, List<FrameDisplay>> displays = new ConcurrentHashMap<>();
   private final Map<Palette, ColorMatcher> colorMatchers = new ConcurrentHashMap<>();
   private final Map<FrameDisplay, BukkitTask> updatableDisplays = new ConcurrentHashMap<>();
+  private final Set<String> loggingPlayers = ConcurrentHashMap.newKeySet();
 
   @Override
   public void onEnable() {
@@ -99,15 +101,21 @@ public final class FramedImage extends JavaPlugin {
     return displays;
   }
 
+  public Set<String> getLoggingPlayers() {
+    return loggingPlayers;
+  }
+
   public void displayNextFrame(FrameDisplay display) {
     Location location = display.getLocation();
     Collection<Player> players = location.getNearbyPlayers(256);
     List<Packet> packets = display.getNextFramePackets();
     players.forEach(player -> {
-      Channel channel = getPlayerChannel(player);
-      if (channel != null) {
-        packets.forEach(channel::write);
-        channel.flush();
+      if (!loggingPlayers.contains(player.getName())) {
+        Channel channel = getPlayerChannel(player);
+        if (channel != null) {
+          packets.forEach(channel::write);
+          channel.flush();
+        }
       }
     });
   }
