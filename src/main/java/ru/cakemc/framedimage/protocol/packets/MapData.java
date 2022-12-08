@@ -24,7 +24,7 @@ import ru.cakemc.framedimage.protocol.Packet;
 import ru.cakemc.framedimage.protocol.IdMapping;
 import ru.cakemc.framedimage.protocol.ProtocolUtils;
 
-import java.util.Map;
+import java.util.function.Function;
 
 public class MapData implements Packet {
 
@@ -46,9 +46,9 @@ public class MapData implements Packet {
   private final int rows;
   private final int posX;
   private final int posY;
-  private final Map<Palette, byte[]> data;
+  private final Function<Palette, byte[]> data;
 
-  public MapData(int mapID, byte scale, int columns, int rows, int posX, int posY, Map<Palette, byte[]> data) {
+  public MapData(int mapID, byte scale, int columns, int rows, int posX, int posY, Function<Palette, byte[]> data) {
     this.mapID = mapID;
     this.scale = scale;
     this.columns = columns;
@@ -58,17 +58,17 @@ public class MapData implements Packet {
     this.data = data;
   }
 
-  public MapData(int mapID, byte scale, int posX, Map<Palette, byte[]> data) {
+  public MapData(int mapID, byte scale, int posX, Function<Palette, byte[]> data) {
     this(mapID, scale, 128, 128, posX, 0, data);
   }
 
-  public MapData(int mapID, byte scale, Map<Palette, byte[]> data) {
+  public MapData(int mapID, byte scale, Function<Palette, byte[]> data) {
     this(mapID, scale, 0, data);
   }
 
   @Override
   public void encode(ByteBuf buf, MinecraftVersion version) {
-    byte[] data = this.data.get(Palette.getPaletteForProtocol(version.getProtocolVersion()));
+    byte[] data = this.data.apply(Palette.getPaletteForProtocol(version.getProtocolVersion()));
 
     if (version.compareTo(MinecraftVersion.MINECRAFT_1_12_2) <= 0) {
       ProtocolUtils.writeVarInt(buf, mapID & ~Short.MIN_VALUE);
