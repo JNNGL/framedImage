@@ -56,7 +56,8 @@ public enum MinecraftVersion {
   MINECRAFT_1_18(757),
   MINECRAFT_1_18_2(758),
   MINECRAFT_1_19(759),
-  MINECRAFT_1_19_1(760);
+  MINECRAFT_1_19_1(760),
+  MINECRAFT_1_19_3(761);
 
   public static final MinecraftVersion MINIMUM_VERSION = MINECRAFT_1_7_2;
   public static final MinecraftVersion MAXIMUM_VERSION = values()[values().length - 1];

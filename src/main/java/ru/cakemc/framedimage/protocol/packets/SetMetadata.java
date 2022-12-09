@@ -38,6 +38,7 @@ public class SetMetadata implements Packet {
           .add(MinecraftVersion.MINECRAFT_1_15, 0x44)
           .add(MinecraftVersion.MINECRAFT_1_17, 0x4D)
           .add(MinecraftVersion.MINECRAFT_1_19_1, 0x50)
+          .add(MinecraftVersion.MINECRAFT_1_19_3, 0x4E)
           .build();
 
   private final int entityId;
