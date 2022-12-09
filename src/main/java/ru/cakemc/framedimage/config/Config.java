@@ -24,6 +24,6 @@ public class Config extends YamlConfig {
   @Ignore
   public static final Config IMP = new Config();
 
-  public boolean DITHERING = false;
+  public boolean DITHERING = true;
   public boolean GLOW = false;
 }
