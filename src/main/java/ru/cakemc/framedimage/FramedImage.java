@@ -23,6 +23,7 @@ import com.jnngl.mapcolor.matchers.CachedColorMatcher;
 import com.jnngl.mapcolor.palette.Palette;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
@@ -110,7 +111,12 @@ public final class FramedImage extends JavaPlugin {
   }
 
   public void writePacket(Channel channel, Packet packet) {
-    if (encoderContext == null) {
+    ChannelHandlerContext context =
+        encoderContext != null
+            ? channel.pipeline().context(encoderContext)
+            : null;
+
+    if (context == null) {
       Iterator<Map.Entry<String, ChannelHandler>> handlerIterator = channel.pipeline().iterator();
       do {
         if (!handlerIterator.hasNext()) {
@@ -119,9 +125,12 @@ public final class FramedImage extends JavaPlugin {
       } while (!handlerIterator.next().getKey().equals("framedimage:encoder"));
 
       encoderContext = handlerIterator.next().getKey();
+
+      writePacket(channel, packet);
+      return;
     }
 
-    channel.pipeline().context(encoderContext).write(packet);
+    context.write(packet);
   }
 
   public void displayNextFrame(FrameDisplay display) {
