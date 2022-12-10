@@ -33,6 +33,7 @@ import ru.cakemc.framedimage.util.BlockUtil;
 import ru.cakemc.framedimage.util.ImageUtil;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 
 public class CreateSubcommand implements SubCommand {
@@ -44,7 +45,7 @@ public class CreateSubcommand implements SubCommand {
   }
 
   @Override
-  public boolean execute(CommandSender commandSender, List<String> args) throws Exception {
+  public boolean execute(CommandSender commandSender, List<String> args) {
     if (!commandSender.hasPermission("framedimage.subcommand.create")) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.NOT_ENOUGH_PERMISSIONS);
       return true;
@@ -81,11 +82,15 @@ public class CreateSubcommand implements SubCommand {
 
     Location location = BlockUtil.getNextBlockLocation(block.getLocation(), blockFace);
 
-    List<BufferedImage> frames = ImageUtil.readFrames(urlString);
     Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-      FrameDisplay frameDisplay = new FrameDisplay(plugin, location, blockFace, width, height, frames);
-      plugin.add(frameDisplay);
-      plugin.saveFrames();
+      try {
+        List<BufferedImage> frames = ImageUtil.readFrames(urlString);
+        FrameDisplay frameDisplay = new FrameDisplay(plugin, location, blockFace, width, height, frames);
+        plugin.add(frameDisplay);
+        plugin.saveFrames();
+      } catch(IOException e) {
+        commandSender.sendMessage(ChatColor.RED + e.getClass().getName() + ": " + e.getMessage());
+      }
     });
 
     return true;
