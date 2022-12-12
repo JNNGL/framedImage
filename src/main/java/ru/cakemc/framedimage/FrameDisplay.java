@@ -50,7 +50,7 @@ public class FrameDisplay {
   };
 
   private static int EID_COUNTER = 0;
-  private static int MAP_COUNTER = 0;
+  private static int MAP_COUNTER = -1;
 
   private final List<List<Packet>> framePackets;
   private final List<Packet> spawnPackets = new ArrayList<>();

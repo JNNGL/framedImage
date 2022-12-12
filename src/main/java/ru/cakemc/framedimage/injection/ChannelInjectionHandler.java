@@ -19,6 +19,7 @@ package ru.cakemc.framedimage.injection;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -26,6 +27,7 @@ import io.netty.channel.ChannelPromise;
 
 import java.util.List;
 
+@ChannelHandler.Sharable
 public class ChannelInjectionHandler extends ChannelInboundHandlerAdapter {
 
   private final List<ChannelInjector> injectors;
