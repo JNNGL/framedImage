@@ -80,7 +80,7 @@ public class Frames extends YamlConfig {
           ImageIO.write(display.getFrames().get(i), "PNG", file);
         }
 
-        FRAMES.add(file.getPath());
+        FRAMES.add(file.getPath().replace(File.separatorChar, '/'));
       }
     }
 
