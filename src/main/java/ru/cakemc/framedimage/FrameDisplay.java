@@ -41,11 +41,11 @@ import java.util.stream.Collectors;
 
 public class FrameDisplay {
 
-  private static final BlockFace[] OFFSET_FACES = new BlockFace[] {
+  private static final BlockFace[] OFFSET_FACES = new BlockFace[]{
       BlockFace.WEST, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH
   };
 
-  private static final Facing[] FACINGS = new Facing[] {
+  private static final Facing[] FACINGS = new Facing[]{
       Facing.NORTH, Facing.EAST, Facing.SOUTH, Facing.WEST
   };
 
@@ -65,31 +65,31 @@ public class FrameDisplay {
   private Iterator<List<Packet>> framePacketsIterator;
 
   private static BufferedImage resizeIfNeeded(BufferedImage image, int width, int height) {
-     if (image.getWidth() != width || image.getHeight() != height) {
-       BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    if (image.getWidth() != width || image.getHeight() != height) {
+      BufferedImage resized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-       Graphics2D graphics = resized.createGraphics();
-       graphics.drawImage(image.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
-       graphics.dispose();
+      Graphics2D graphics = resized.createGraphics();
+      graphics.drawImage(image.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
+      graphics.dispose();
 
-       return resized;
-     } else {
-       return image;
-     }
+      return resized;
+    } else {
+      return image;
+    }
   }
 
   public FrameDisplay(FramedImage plugin, Location location, BlockFace face,
                       int width, int height, List<BufferedImage> frames, UUID uuid) {
+    frames = frames.stream()
+        .map(image -> resizeIfNeeded(image, width * 128, height * 128))
+        .collect(Collectors.toList());
+
     this.location = location;
     this.face = face;
     this.width = width;
     this.height = height;
     this.frames = frames;
     this.uuid = uuid;
-
-    frames = frames.stream()
-        .map(image -> resizeIfNeeded(image, width * 128, height * 128))
-        .collect(Collectors.toList());
 
     framePackets = frames.stream()
         .map(frame -> new ArrayList<Packet>())
@@ -126,12 +126,27 @@ public class FrameDisplay {
 
           int mapId = --MAP_COUNTER;
 
-          Map<Palette, byte[]> data = new HashMap<>();
-          for (Palette palette : Palette.ALL_PALETTES) {
-            data.put(palette, plugin.getColorMatchers().get(palette).matchImage(part));
+          if (Config.IMP.CACHE_MAPS) {
+            Map<Palette, byte[]> data = new HashMap<>();
+            for (Palette palette : Palette.ALL_PALETTES) {
+              data.put(palette, plugin.getColorMatchers().get(palette).matchImage(part));
+            }
+
+            spawnPackets.add(new MapData(mapId, (byte) 0, data::get));
+          } else {
+            spawnPackets.add(
+                new MapData(
+                    mapId,
+                    (byte) 0,
+                    palette ->
+                        plugin
+                            .getColorMatchers()
+                            .get(palette)
+                            .matchImage(part)
+                )
+            );
           }
 
-          spawnPackets.add(new MapData(mapId, (byte) 0, data));
           framePackets.get(i).add(new SetMetadata(eid, version -> ItemFrame.createMapMetadata(version, mapId)));
         }
 

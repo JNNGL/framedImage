@@ -26,4 +26,5 @@ public class Config extends YamlConfig {
 
   public boolean DITHERING = true;
   public boolean GLOW = false;
+  public boolean CACHE_MAPS = true;
 }
