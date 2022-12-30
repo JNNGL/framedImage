@@ -1,6 +1,6 @@
 name: FramedImage
 version: '${version}'
-main: ru.cakemc.framedimage.FramedImage
+main: com.jnngl.framedimage.FramedImage
 api-version: 1.13
 
 commands:
