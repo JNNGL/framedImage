@@ -58,6 +58,7 @@ public class PlayerListener implements Listener {
   @EventHandler
   public void onRespawn(PlayerRespawnEvent event) {
     Player player = event.getPlayer();
+    plugin.getPlayerDisplays().remove(player.getName());
     if (player.getLocation().getWorld() == event.getRespawnLocation().getWorld()) {
       Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.spawn(player), 10L);
     }
@@ -65,6 +66,8 @@ public class PlayerListener implements Listener {
 
   @EventHandler
   public void onChangeDimension(PlayerChangedWorldEvent event) {
-    plugin.spawn(event.getPlayer());
+    Player player = event.getPlayer();
+    plugin.getPlayerDisplays().remove(player.getName());
+    plugin.spawn(player);
   }
 }

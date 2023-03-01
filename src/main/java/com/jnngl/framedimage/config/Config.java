@@ -27,4 +27,15 @@ public class Config extends YamlConfig {
   public boolean DITHERING = true;
   public boolean GLOW = false;
   public boolean CACHE_MAPS = true;
+
+  @Create
+  public DYNAMIC_FRAME_SPAWN DYNAMIC_FRAME_SPAWN;
+
+  public static class DYNAMIC_FRAME_SPAWN {
+
+    @Comment("Frames will only be sent when the player gets closer to them.")
+    public boolean ENABLED = true;
+    public int SECTION_SHIFT = 7;
+    public int GRID_SIZE = 3;
+  }
 }

@@ -18,6 +18,8 @@
 package com.jnngl.framedimage;
 
 import com.jnngl.framedimage.injection.Injector;
+import com.jnngl.framedimage.listener.MoveListener;
+import com.jnngl.framedimage.util.SectionUtil;
 import com.jnngl.mapcolor.ColorMatcher;
 import com.jnngl.mapcolor.matchers.BufferedImageMatcher;
 import com.jnngl.mapcolor.matchers.CachedColorMatcher;
@@ -31,6 +33,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import com.jnngl.framedimage.command.FiCommand;
@@ -43,13 +46,7 @@ import com.jnngl.framedimage.protocol.Packet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class FramedImage extends JavaPlugin {
@@ -58,12 +55,15 @@ public final class FramedImage extends JavaPlugin {
   private final File configFile = new File(getDataFolder(), "config.yml");
   private final File messagesFile = new File(getDataFolder(), "messages.yml");
   private final File framesFile = new File(getDataFolder(), "frames.yml");
+  private final Map<String, Map<Long, List<FrameDisplay>>> sectionDisplays = new ConcurrentHashMap<>();
+  private final Map<String, Set<FrameDisplay>> playerDisplays = new ConcurrentHashMap<>();
   private final Map<String, Channel> playerChannels = new ConcurrentHashMap<>();
   private final Map<String, List<FrameDisplay>> displays = new ConcurrentHashMap<>();
   private final Map<Palette, ColorMatcher> colorMatchers = new ConcurrentHashMap<>();
   private final Map<FrameDisplay, BukkitTask> updatableDisplays = new ConcurrentHashMap<>();
   private final Set<String> loggingPlayers = ConcurrentHashMap.newKeySet();
   private String encoderContext = null;
+  private MoveListener moveListener = null;
 
   @Override
   public void onEnable() {
@@ -82,6 +82,8 @@ public final class FramedImage extends JavaPlugin {
     Metrics metrics = new Metrics(this, 16966);
     metrics.addCustomChart(new SimplePie("dithering", () -> String.valueOf(Config.IMP.DITHERING)));
     metrics.addCustomChart(new SimplePie("glow", () -> String.valueOf(Config.IMP.GLOW)));
+    metrics.addCustomChart(new SimplePie("dynamic_frame_spawn",
+        () -> String.valueOf(Config.IMP.DYNAMIC_FRAME_SPAWN.ENABLED)));
   }
 
   @Override
@@ -108,6 +110,11 @@ public final class FramedImage extends JavaPlugin {
 
   public Set<String> getLoggingPlayers() {
     return loggingPlayers;
+  }
+
+  public List<FrameDisplay> getSectionDisplays(String world, long section) {
+    Map<Long, List<FrameDisplay>> sectionMap = sectionDisplays.getOrDefault(world, Collections.emptyMap());
+    return sectionMap.getOrDefault(section, Collections.emptyList());
   }
 
   public void writePacket(Channel channel, Packet packet) {
@@ -165,22 +172,16 @@ public final class FramedImage extends JavaPlugin {
 
     List<Player> players = world.getPlayers();
     players.forEach(player -> spawn(display, player));
-
-    if (display.getNumFrames() > 1) {
-      updatableDisplays.put(
-          display,
-          Bukkit.getScheduler().runTaskTimer(
-              this,
-              () -> displayNextFrame(display),
-              1L, 1L
-          )
-      );
-    }
   }
 
   public void spawn(Player player) {
     World world = player.getLocation().getWorld();
     if (world == null) {
+      return;
+    }
+
+    if (Config.IMP.DYNAMIC_FRAME_SPAWN.ENABLED) {
+      updateSection(player);
       return;
     }
 
@@ -210,7 +211,12 @@ public final class FramedImage extends JavaPlugin {
     }
 
     List<Player> players = world.getPlayers();
-    players.forEach(player -> destroy(display, player));
+    if (Config.IMP.DYNAMIC_FRAME_SPAWN.ENABLED) {
+      removeSections(display);
+      players.forEach(this::updateSection);
+    } else {
+      players.forEach(player -> destroy(display, player));
+    }
   }
 
   public void destroyAll() {
@@ -220,17 +226,56 @@ public final class FramedImage extends JavaPlugin {
         .forEach(this::destroy);
   }
 
+  private void addSections(FrameDisplay display) {
+    String worldName = display.getLocation().getWorld().getName();
+    Map<Long, List<FrameDisplay>> world = sectionDisplays.computeIfAbsent(worldName, key -> new ConcurrentHashMap<>());
+    display.getSections().forEach(section ->
+        world.computeIfAbsent(section, key -> Collections.synchronizedList(new ArrayList<>())).add(display));
+  }
+
+  private void removeSections(FrameDisplay display) {
+    String worldName = display.getLocation().getWorld().getName();
+    Map<Long, List<FrameDisplay>> world = sectionDisplays.get(worldName);
+    display.getSections().forEach(section -> {
+      List<FrameDisplay> displays = world.get(section);
+      displays.remove(display);
+      if (displays.isEmpty()) {
+        world.remove(section);
+        if (world.isEmpty()) {
+          sectionDisplays.remove(worldName);
+        }
+      }
+    });
+  }
+
   public void add(FrameDisplay display) {
     World world = display.getLocation().getWorld();
     if (world == null) {
       return;
     }
 
-    spawn(display);
+    if (Config.IMP.DYNAMIC_FRAME_SPAWN.ENABLED) {
+      addSections(display);
+      world.getPlayers().forEach(this::updateSection);
+    } else {
+      spawn(display);
+    }
+
+    if (display.getNumFrames() > 1) {
+      updatableDisplays.put(
+          display,
+          Bukkit.getScheduler().runTaskTimer(
+              this,
+              () -> displayNextFrame(display),
+              1L, 1L
+          )
+      );
+    }
+
     displays.computeIfAbsent(world.getName(), k -> new ArrayList<>()).add(display);
 
     try {
-      synchronized (Frames.IMP.MUTEX) {
+      synchronized (Frames.class) {
         Frames.IMP.FRAMES.put(display.getUUID().toString(), new Frames.FrameNode(display, getDataFolder()));
       }
     } catch (IOException e) {
@@ -247,7 +292,7 @@ public final class FramedImage extends JavaPlugin {
     destroy(display);
     displays.get(world.getName()).remove(display);
 
-    synchronized (Frames.IMP.MUTEX) {
+    synchronized (Frames.class) {
       Frames.IMP.FRAMES.remove(display.getUUID().toString());
     }
   }
@@ -255,8 +300,9 @@ public final class FramedImage extends JavaPlugin {
   public void removeAll() {
     destroyAll();
     displays.clear();
+    sectionDisplays.clear();
 
-    synchronized (Frames.IMP.MUTEX) {
+    synchronized (Frames.class) {
       Frames.IMP.FRAMES.clear();
     }
   }
@@ -281,7 +327,7 @@ public final class FramedImage extends JavaPlugin {
       );
     }
 
-    synchronized (Frames.IMP.MUTEX) {
+    synchronized (Frames.class) {
       getLogger().info("Loading " + Frames.IMP.FRAMES.size() + " images.");
 
       Frames.IMP.FRAMES.forEach(
@@ -296,9 +342,51 @@ public final class FramedImage extends JavaPlugin {
     }
 
     saveFrames();
+
+    if (moveListener != null) {
+      HandlerList.unregisterAll(moveListener);
+      moveListener = null;
+    }
+
+    if (Config.IMP.DYNAMIC_FRAME_SPAWN.ENABLED) {
+      moveListener = new MoveListener(this);
+      Bukkit.getPluginManager().registerEvents(moveListener, this);
+    }
+  }
+
+  public void updateSection(Player player, String world, long section) {
+    Set<FrameDisplay> currentlyLoaded = playerDisplays
+        .computeIfAbsent(player.getName(), key -> ConcurrentHashMap.newKeySet());
+    List<FrameDisplay> sectionDisplays = getSectionDisplays(world, section);
+
+    for (FrameDisplay display : sectionDisplays) {
+      if (!currentlyLoaded.remove(display)) {
+        spawn(display, player);
+      }
+    }
+
+    for (FrameDisplay display : currentlyLoaded) {
+      destroy(display, player);
+      currentlyLoaded.remove(display);
+    }
+
+    currentlyLoaded.addAll(sectionDisplays);
+  }
+
+  public void updateSection(Player player) {
+    Location location = player.getLocation();
+    updateSection(player, location.getWorld().getName(), SectionUtil.getSectionIndex(location));
   }
 
   public Map<Palette, ColorMatcher> getColorMatchers() {
     return colorMatchers;
+  }
+
+  public Map<String, Map<Long, List<FrameDisplay>>> getAllSectionDisplays() {
+    return sectionDisplays;
+  }
+
+  public Map<String, Set<FrameDisplay>> getPlayerDisplays() {
+    return playerDisplays;
   }
 }

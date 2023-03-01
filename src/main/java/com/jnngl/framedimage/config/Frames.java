@@ -44,9 +44,6 @@ public class Frames extends YamlConfig {
 
   public Map<String, FrameNode> FRAMES = new HashMap<>();
 
-  @Ignore
-  public final Object MUTEX = new Object();
-
   @NodeSequence
   public static class FrameNode {
 

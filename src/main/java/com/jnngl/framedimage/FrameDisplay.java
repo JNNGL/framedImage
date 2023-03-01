@@ -21,6 +21,7 @@ import com.jnngl.framedimage.protocol.packets.DestroyEntity;
 import com.jnngl.framedimage.protocol.packets.MapData;
 import com.jnngl.framedimage.protocol.packets.SetMetadata;
 import com.jnngl.framedimage.protocol.packets.SpawnEntity;
+import com.jnngl.framedimage.util.SectionUtil;
 import com.jnngl.mapcolor.palette.Palette;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
@@ -31,12 +32,8 @@ import com.jnngl.framedimage.protocol.data.ItemFrame;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class FrameDisplay {
@@ -63,6 +60,7 @@ public class FrameDisplay {
   private final List<BufferedImage> frames;
   private final UUID uuid;
   private Iterator<List<Packet>> framePacketsIterator;
+  private List<Long> sections;
 
   private static BufferedImage resizeIfNeeded(BufferedImage image, int width, int height) {
     if (image.getWidth() != width || image.getHeight() != height) {
@@ -172,6 +170,26 @@ public class FrameDisplay {
     }
   }
 
+  public List<Long> getSections() {
+    if (sections != null) {
+      return sections;
+    }
+
+    int centerX = location.getBlockX();
+    int centerZ = location.getBlockZ();
+    int radius = (Config.IMP.DYNAMIC_FRAME_SPAWN.GRID_SIZE - 1) / 2;
+    int offset = 1 << Config.IMP.DYNAMIC_FRAME_SPAWN.SECTION_SHIFT;
+
+    sections = new ArrayList<>();
+    for (int x = -radius; x <= radius; x++) {
+      for (int z = -radius; z <= radius; z++) {
+        sections.add(SectionUtil.getSectionIndex(centerX + x * offset, centerZ + z * offset));
+      }
+    }
+
+    return sections = Collections.unmodifiableList(sections);
+  }
+
   public int getNumFrames() {
     return frames.size();
   }
@@ -210,5 +228,19 @@ public class FrameDisplay {
 
   public List<Packet> getDestroyPackets() {
     return destroyPackets;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof FrameDisplay)) {
+      return false;
+    }
+
+    return uuid.equals(((FrameDisplay) obj).getUUID());
+  }
+
+  @Override
+  public int hashCode() {
+    return uuid.hashCode();
   }
 }

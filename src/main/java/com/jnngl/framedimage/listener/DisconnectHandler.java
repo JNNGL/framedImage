@@ -35,6 +35,7 @@ public class DisconnectHandler extends ChannelInboundHandlerAdapter {
   public void channelInactive(ChannelHandlerContext ctx) throws Exception {
     plugin.getLoggingPlayers().remove(name);
     plugin.getPlayerChannels().remove(name);
+    plugin.getPlayerDisplays().remove(name);
     super.channelInactive(ctx);
   }
 }
