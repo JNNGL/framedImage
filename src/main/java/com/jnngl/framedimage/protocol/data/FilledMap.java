@@ -32,6 +32,7 @@ public class FilledMap {
           .add(MinecraftVersion.MINECRAFT_1_17, 847)
           .add(MinecraftVersion.MINECRAFT_1_19, 886)
           .add(MinecraftVersion.MINECRAFT_1_19_3, 914)
+          .add(MinecraftVersion.MINECRAFT_1_19_4, 937)
           .build();
 
   public static int getID(MinecraftVersion version) {
