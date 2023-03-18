@@ -32,6 +32,7 @@ public class SpawnEntity implements Packet {
       new IdMapping()
           .add(MinecraftVersion.MINIMUM_VERSION, 0x0E)
           .add(MinecraftVersion.MINECRAFT_1_9, 0x00)
+          .add(MinecraftVersion.MINECRAFT_1_19_4, 0x01)
           .build();
 
   private final int id;
