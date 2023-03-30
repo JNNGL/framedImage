@@ -21,13 +21,12 @@ import com.jnngl.framedimage.FrameDisplay;
 import com.jnngl.framedimage.FramedImage;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import com.jnngl.framedimage.command.SubCommand;
 import com.jnngl.framedimage.config.Messages;
-import com.jnngl.framedimage.util.BlockUtil;
+import org.bukkit.util.Vector;
 
 import java.util.List;
 
@@ -51,46 +50,51 @@ public class RemoveSubcommand implements SubCommand {
       return true;
     }
 
-    BlockFace blockFace = BlockUtil.getBlockFace(player.getLocation().getYaw());
-
-    Block block = player.getTargetBlock(null, 100);
-    if (block.isEmpty()) {
-      commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.REMOVE.BLOCK_NOT_FOUND);
-      return true;
-    }
-
-    Location targetLocation = BlockUtil.getNextBlockLocation(block.getLocation(), blockFace);
-    List<FrameDisplay> displays = plugin.getDisplays().get(targetLocation.getWorld().getName());
+    List<FrameDisplay> displays = plugin.getDisplays().get(player.getWorld().getName());
     if (displays == null) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.REMOVE.IMAGE_NOT_FOUND);
       return true;
     }
 
+    Vector origin = player.getEyeLocation().toVector();
+    Vector direction = player.getLocation().getDirection();
+
     FrameDisplay targetDisplay = null;
+    double nearest = Double.MAX_VALUE;
+
     for (FrameDisplay display : displays) {
       Location location = display.getLocation();
+      if (location.distanceSquared(player.getLocation()) > 50 * 50) {
+        continue;
+      }
+
       int width = display.getWidth();
       int height = display.getHeight();
       BlockFace offsetFace = display.getOffsetFace();
 
-      int x1 = location.getBlockX();
-      int y1 = location.getBlockY();
-      int z1 = location.getBlockZ();
+      Vector point1 = location.toVector();
+      Vector point2 = location.toVector().add(
+          new Vector(
+              width * offsetFace.getModX() + 0.1 * offsetFace.getModZ(),
+              height,
+              width * offsetFace.getModZ() + 0.1 * offsetFace.getModX()
+          )
+      );
 
-      int x2 = x1 + width * offsetFace.getModX();
-      int y2 = y1 + height;
-      int z2 = z1 + width * offsetFace.getModZ();
+      Vector min = Vector.getMinimum(point1, point2);
+      point2 = Vector.getMaximum(point1, point2);
+      point1 = min;
 
-      if (
-          targetLocation.getBlockX() >= Math.min(x1, x2) &&
-          targetLocation.getBlockX() <= Math.max(x1, x2) &&
-          targetLocation.getBlockY() >= Math.min(y1, y2) &&
-          targetLocation.getBlockY() <= Math.max(y1, y2) &&
-          targetLocation.getBlockZ() >= Math.min(z1, z2) &&
-          targetLocation.getBlockZ() <= Math.max(z1, z2)
-      ) {
+      point1.subtract(origin).divide(direction);
+      point2.subtract(origin).divide(direction);
+      Vector near = Vector.getMinimum(point1, point2);
+      Vector far = Vector.getMaximum(point1, point2);
+      double nearDistance = Math.max(Math.max(near.getX(), near.getY()), near.getZ());
+      double farDistance = Math.min(Math.min(far.getX(), far.getY()), far.getZ());
+
+      if (nearDistance <= farDistance && nearDistance < nearest) {
         targetDisplay = display;
-        break;
+        nearest = nearDistance;
       }
     }
 

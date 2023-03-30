@@ -62,6 +62,7 @@ public class Messages extends YamlConfig {
         public String HELP = "Deletes the image the cursor is pointing to.";
         @Placeholders("{COMMAND}")
         public String USAGE = "/{COMMAND} remove";
+        @Deprecated
         public String BLOCK_NOT_FOUND = "Can't find block.";
         public String ONLY_PLAYERS_CAN_USE = "Only players can use this command.";
         public String IMAGE_NOT_FOUND = "Can't find image.";
