@@ -24,6 +24,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPromise;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -37,17 +38,17 @@ public class ChannelInjectionHandler extends ChannelInboundHandlerAdapter {
   }
 
   @Override
-  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+  public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) throws Exception {
     Channel channel = (Channel) msg;
 
     channel.pipeline().addLast(new ChannelInitializer<>() {
 
       @Override
-      protected void initChannel(Channel ch) {
+      protected void initChannel(@NotNull Channel ch) {
         channel.pipeline().addLast(new ChannelDuplexHandler() {
 
           @Override
-          public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+          public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) throws Exception {
             ctx.pipeline().remove(this);
             inject(ctx.channel());
 

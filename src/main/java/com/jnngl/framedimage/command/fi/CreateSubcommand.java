@@ -21,7 +21,6 @@ import com.jnngl.framedimage.FrameDisplay;
 import com.jnngl.framedimage.FramedImage;
 import com.jnngl.framedimage.util.ImageUtil;
 import net.elytrium.java.commons.config.Placeholders;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -56,12 +55,10 @@ public class CreateSubcommand implements SubCommand {
       return false;
     }
 
-    if (!(commandSender instanceof Player)) {
+    if (!(commandSender instanceof Player player)) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.CREATE.ONLY_PLAYERS_CAN_USE);
       return true;
     }
-
-    Player player = (Player) commandSender;
 
     int width = Integer.parseInt(args.get(0));
     int height = Integer.parseInt(args.get(1));
@@ -75,14 +72,14 @@ public class CreateSubcommand implements SubCommand {
     BlockFace blockFace = BlockUtil.getBlockFace(player.getLocation().getYaw());
 
     Block block = player.getTargetBlock(null, 10);
-    if (block == null || block.isEmpty()) {
+    if (block.isEmpty()) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.CREATE.BLOCK_NOT_FOUND);
       return true;
     }
 
     Location location = BlockUtil.getNextBlockLocation(block.getLocation(), blockFace);
 
-    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+    plugin.getScheduler().runAsync(plugin, () -> {
       try {
         List<BufferedImage> frames = ImageUtil.readFrames(urlString);
         FrameDisplay frameDisplay = new FrameDisplay(plugin, location, blockFace, width, height, frames);

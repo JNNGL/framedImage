@@ -20,7 +20,6 @@ package com.jnngl.framedimage.listener;
 import com.jnngl.framedimage.FramedImage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,7 +37,7 @@ public class PlayerListener implements Listener {
 
   @EventHandler
   public void onJoin(PlayerJoinEvent event) {
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+    plugin.getScheduler().runDelayed(plugin, () -> {
       Player player = event.getPlayer();
       plugin.getLoggingPlayers().remove(player.getName());
       Channel channel = plugin.getPlayerChannel(player);
@@ -60,7 +59,7 @@ public class PlayerListener implements Listener {
     Player player = event.getPlayer();
     plugin.getPlayerDisplays().remove(player.getName());
     if (player.getLocation().getWorld() == event.getRespawnLocation().getWorld()) {
-      Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.spawn(player), 10L);
+      plugin.getScheduler().runDelayed(plugin, () -> plugin.spawn(player), 10L);
     }
   }
 

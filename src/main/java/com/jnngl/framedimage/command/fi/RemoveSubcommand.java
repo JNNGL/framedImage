@@ -46,17 +46,15 @@ public class RemoveSubcommand implements SubCommand {
       return true;
     }
 
-    if (!(commandSender instanceof Player)) {
+    if (!(commandSender instanceof Player player)) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.REMOVE.ONLY_PLAYERS_CAN_USE);
       return true;
     }
 
-    Player player = (Player) commandSender;
-
     BlockFace blockFace = BlockUtil.getBlockFace(player.getLocation().getYaw());
 
     Block block = player.getTargetBlock(null, 100);
-    if (block == null || block.isEmpty()) {
+    if (block.isEmpty()) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.REMOVE.BLOCK_NOT_FOUND);
       return true;
     }

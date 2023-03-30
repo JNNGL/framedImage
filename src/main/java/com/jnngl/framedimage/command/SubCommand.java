@@ -23,6 +23,8 @@ import org.bukkit.command.CommandSender;
 public interface SubCommand {
 
   boolean execute(CommandSender commandSender, List<String> args) throws Exception;
+
   String help(CommandSender commandSender);
+
   String usage(CommandSender commandSender, String name);
 }

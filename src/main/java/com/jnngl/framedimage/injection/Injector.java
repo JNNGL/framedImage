@@ -99,11 +99,10 @@ public class Injector {
 
       for (Field field : connection.getClass().getDeclaredFields()) {
         Type genericType = field.getGenericType();
-        if (!(genericType instanceof ParameterizedType)) {
+        if (!(genericType instanceof ParameterizedType type)) {
           continue;
         }
 
-        ParameterizedType type = (ParameterizedType) genericType;
         if (type.getRawType() != List.class) {
           continue;
         }

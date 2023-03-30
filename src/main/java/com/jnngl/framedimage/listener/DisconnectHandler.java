@@ -20,6 +20,7 @@ package com.jnngl.framedimage.listener;
 import com.jnngl.framedimage.FramedImage;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.jetbrains.annotations.NotNull;
 
 public class DisconnectHandler extends ChannelInboundHandlerAdapter {
 
@@ -32,7 +33,7 @@ public class DisconnectHandler extends ChannelInboundHandlerAdapter {
   }
 
   @Override
-  public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+  public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
     plugin.getLoggingPlayers().remove(name);
     plugin.getPlayerChannels().remove(name);
     plugin.getPlayerDisplays().remove(name);

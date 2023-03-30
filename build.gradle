@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.jnngl'
-version = '1.4'
+version = '1.5-SNAPSHOT'
 
 repositories {
   mavenCentral()
@@ -27,12 +27,12 @@ dependencies {
   implementation 'com.jnngl:mapcolor:1.0.1-SNAPSHOT'
   implementation 'org.bstats:bstats-bukkit:3.0.0'
 
-  compileOnly 'com.destroystokyo.paper:paper-api:1.12.2-R0.1-SNAPSHOT'
+  compileOnly 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
 
   compileOnly 'io.netty:netty-all:4.1.85.Final'
 }
 
-def targetJavaVersion = 11
+def targetJavaVersion = 17
 java {
   def javaVersion = JavaVersion.toVersion(targetJavaVersion)
   sourceCompatibility = javaVersion

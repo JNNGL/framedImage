@@ -19,6 +19,10 @@ package com.jnngl.framedimage;
 
 import com.jnngl.framedimage.injection.Injector;
 import com.jnngl.framedimage.listener.MoveListener;
+import com.jnngl.framedimage.scheduler.BukkitTaskScheduler;
+import com.jnngl.framedimage.scheduler.CancellableTask;
+import com.jnngl.framedimage.scheduler.FoliaTaskScheduler;
+import com.jnngl.framedimage.scheduler.TaskScheduler;
 import com.jnngl.framedimage.util.SectionUtil;
 import com.jnngl.mapcolor.ColorMatcher;
 import com.jnngl.mapcolor.matchers.BufferedImageMatcher;
@@ -35,7 +39,6 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 import com.jnngl.framedimage.command.FiCommand;
 import com.jnngl.framedimage.config.Config;
 import com.jnngl.framedimage.config.Frames;
@@ -60,23 +63,37 @@ public final class FramedImage extends JavaPlugin {
   private final Map<String, Channel> playerChannels = new ConcurrentHashMap<>();
   private final Map<String, List<FrameDisplay>> displays = new ConcurrentHashMap<>();
   private final Map<Palette, ColorMatcher> colorMatchers = new ConcurrentHashMap<>();
-  private final Map<FrameDisplay, BukkitTask> updatableDisplays = new ConcurrentHashMap<>();
+  private final Map<FrameDisplay, CancellableTask> updatableDisplays = new ConcurrentHashMap<>();
   private final Set<String> loggingPlayers = ConcurrentHashMap.newKeySet();
+  private final TaskScheduler scheduler;
   private String encoderContext = null;
   private MoveListener moveListener = null;
 
+  {
+    TaskScheduler scheduler;
+    try {
+      Class.forName("io.papermc.paper.threadedregions.scheduler.AsyncScheduler");
+      getLogger().info("Using folia scheduler");
+      scheduler = new FoliaTaskScheduler();
+    } catch (ClassNotFoundException e) {
+      getLogger().info("Using bukkit scheduler");
+      scheduler = new BukkitTaskScheduler();
+    }
+
+    this.scheduler = scheduler;
+  }
+
   @Override
   public void onEnable() {
-    injector.addInjector(channel -> {
-      channel.pipeline().addAfter("splitter", "framedimage:handshake", new HandshakeListener(this));
-    });
+    injector.addInjector(channel ->
+        channel.pipeline().addAfter("splitter", "framedimage:handshake", new HandshakeListener(this)));
 
     injector.inject();
     getLogger().info("Successfully injected!");
 
-    Bukkit.getScheduler().scheduleSyncDelayedTask(this, this::reload);
+    scheduler.runDelayed(this, this::reload);
 
-    getCommand("fi").setExecutor(new FiCommand(this));
+    Objects.requireNonNull(getCommand("fi")).setExecutor(new FiCommand(this));
     getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
 
     Metrics metrics = new Metrics(this, 16966);
@@ -200,7 +217,7 @@ public final class FramedImage extends JavaPlugin {
   }
 
   public void destroy(FrameDisplay display) {
-    BukkitTask updater = updatableDisplays.remove(display);
+    CancellableTask updater = updatableDisplays.remove(display);
     if (updater != null) {
       updater.cancel();
     }
@@ -264,8 +281,9 @@ public final class FramedImage extends JavaPlugin {
     if (display.getNumFrames() > 1) {
       updatableDisplays.put(
           display,
-          Bukkit.getScheduler().runTaskTimer(
+          scheduler.runAtFixedRate(
               this,
+              display.getLocation(),
               () -> displayNextFrame(display),
               1L, 1L
           )
@@ -388,5 +406,9 @@ public final class FramedImage extends JavaPlugin {
 
   public Map<String, Set<FrameDisplay>> getPlayerDisplays() {
     return playerDisplays;
+  }
+
+  public TaskScheduler getScheduler() {
+    return scheduler;
   }
 }

@@ -28,6 +28,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import com.jnngl.framedimage.config.Messages;
+import org.jetbrains.annotations.NotNull;
 
 public class SubCommandExecutor implements CommandExecutor {
   private final Map<String, SubCommand> subcommands = new HashMap<>();
@@ -43,7 +44,7 @@ public class SubCommandExecutor implements CommandExecutor {
   }
 
   @Override
-  public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
+  public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, String[] args) {
     if (permission != null && !commandSender.hasPermission(permission)) {
       commandSender.sendMessage(ChatColor.RED + Messages.IMP.MESSAGES.COMMAND.NOT_ENOUGH_PERMISSIONS);
       return true;

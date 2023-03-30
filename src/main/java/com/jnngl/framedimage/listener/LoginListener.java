@@ -24,6 +24,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import com.jnngl.framedimage.protocol.MinecraftVersion;
 import com.jnngl.framedimage.protocol.PacketEncoder;
 import com.jnngl.framedimage.protocol.ProtocolUtils;
+import org.jetbrains.annotations.NotNull;
 
 public class LoginListener extends ChannelInboundHandlerAdapter {
 
@@ -36,9 +37,8 @@ public class LoginListener extends ChannelInboundHandlerAdapter {
   }
 
   @Override
-  public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-    if (msg instanceof ByteBuf) {
-      ByteBuf buf = (ByteBuf) msg;
+  public void channelRead(@NotNull ChannelHandlerContext ctx, @NotNull Object msg) throws Exception {
+    if (msg instanceof ByteBuf buf) {
       int ridx = buf.readerIndex();
 
       if (ProtocolUtils.readVarInt(buf) == 0) {
