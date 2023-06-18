@@ -99,8 +99,9 @@ public final class FramedImage extends JavaPlugin {
     Metrics metrics = new Metrics(this, 16966);
     metrics.addCustomChart(new SimplePie("dithering", () -> String.valueOf(Config.IMP.DITHERING)));
     metrics.addCustomChart(new SimplePie("glow", () -> String.valueOf(Config.IMP.GLOW)));
-    metrics.addCustomChart(new SimplePie("dynamic_frame_spawn",
-        () -> String.valueOf(Config.IMP.DYNAMIC_FRAME_SPAWN.ENABLED)));
+    metrics.addCustomChart(new SimplePie("dynamic_frame_spawn", () -> String.valueOf(Config.IMP.DYNAMIC_FRAME_SPAWN.ENABLED)));
+    metrics.addCustomChart(new SimplePie("scheduler", () -> this.scheduler.getClass().getSimpleName()));
+    metrics.addCustomChart(new SimplePie("images_count", () -> String.valueOf(this.displays.values().stream().mapToInt(List::size).sum())));
   }
 
   @Override
@@ -154,7 +155,7 @@ public final class FramedImage extends JavaPlugin {
       return;
     }
 
-    context.write(packet);
+    context.writeAndFlush(packet);
   }
 
   public void displayNextFrame(FrameDisplay display) {
@@ -166,7 +167,6 @@ public final class FramedImage extends JavaPlugin {
         Channel channel = getPlayerChannel(player);
         if (channel != null) {
           packets.forEach(packet -> writePacket(channel, packet));
-          channel.flush();
         }
       }
     });
@@ -177,7 +177,6 @@ public final class FramedImage extends JavaPlugin {
     if (channel != null) {
       display.getSpawnPackets().forEach(packet -> writePacket(channel, packet));
       display.getNextFramePackets().forEach(packet -> writePacket(channel, packet));
-      channel.flush();
     }
   }
 
@@ -212,7 +211,6 @@ public final class FramedImage extends JavaPlugin {
     Channel channel = getPlayerChannel(player);
     if (channel != null) {
       display.getDestroyPackets().forEach(packet -> writePacket(channel, packet));
-      channel.flush();
     }
   }
 

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.jnngl'
-version = '1.5'
+version = '1.6'
 
 repositories {
   mavenCentral()
@@ -16,15 +16,11 @@ repositories {
     name = 'elytrium-repo'
     url = 'https://maven.elytrium.net/repo'
   }
-  maven {
-    name = 'jnngl-repo'
-    url = 'https://jnngl.com/repo'
-  }
 }
 
 dependencies {
   implementation 'net.elytrium:elytrium-java-commons:1.0.8'
-  implementation 'com.jnngl:mapcolor:1.0.1-SNAPSHOT'
+  implementation 'com.jnngl:mapcolor:1.0.1'
   implementation 'org.bstats:bstats-bukkit:3.0.0'
 
   compileOnly 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
