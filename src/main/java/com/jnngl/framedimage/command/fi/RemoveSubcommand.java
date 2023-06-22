@@ -72,14 +72,21 @@ public class RemoveSubcommand implements SubCommand {
       int height = display.getHeight();
       BlockFace offsetFace = display.getOffsetFace();
 
-      Vector point1 = location.toVector();
+      Vector offsetVector = switch(offsetFace) {
+        case SOUTH -> new Vector(1, 0, 0);
+        case NORTH -> new Vector(0, 0, 1);
+        case WEST -> new Vector(1, 0, 1);
+        default -> new Vector();
+      };
+
+      Vector point1 = location.toVector().add(offsetVector);
       Vector point2 = location.toVector().add(
           new Vector(
-              width * offsetFace.getModX() + 0.1 * offsetFace.getModZ(),
+              width * offsetFace.getModX() + -0.1 * offsetFace.getModZ(),
               height,
               width * offsetFace.getModZ() + 0.1 * offsetFace.getModX()
           )
-      );
+      ).add(offsetVector);
 
       Vector min = Vector.getMinimum(point1, point2);
       point2 = Vector.getMaximum(point1, point2);
