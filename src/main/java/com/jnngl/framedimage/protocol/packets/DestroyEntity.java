@@ -40,6 +40,7 @@ public class DestroyEntity implements Packet {
           .add(MinecraftVersion.MINECRAFT_1_19_1, 0x3B)
           .add(MinecraftVersion.MINECRAFT_1_19_3, 0x3A)
           .add(MinecraftVersion.MINECRAFT_1_19_4, 0x3E)
+          .add(MinecraftVersion.MINECRAFT_1_20_2, 0x40)
           .build();
 
   private final int entity;

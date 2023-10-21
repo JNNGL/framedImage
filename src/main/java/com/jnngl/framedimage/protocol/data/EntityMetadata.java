@@ -87,7 +87,7 @@ public class EntityMetadata {
             buf.writeByte(0);
           }
         } else {
-          Nbt.write(buf, nbt);
+          Nbt.write(buf, nbt, protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_20_2) >= 0);
         }
       }
     }

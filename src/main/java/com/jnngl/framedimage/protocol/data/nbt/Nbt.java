@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Nbt {
 
-  public static void write(ByteBuf buf, NbtTag nbtTag) {
+  public static void write(ByteBuf buf, NbtTag nbtTag, boolean rootTag) {
     if (nbtTag == null) {
       buf.writeByte(0);
       return;
@@ -31,9 +31,11 @@ public class Nbt {
 
     buf.writeByte(nbtTag.getTypeID());
 
-    byte[] nameBytes = nbtTag.getName().getBytes(StandardCharsets.UTF_8);
-    buf.writeShort(nameBytes.length);
-    buf.writeBytes(nameBytes);
+    if (!rootTag) {
+      byte[] nameBytes = nbtTag.getName().getBytes(StandardCharsets.UTF_8);
+      buf.writeShort(nameBytes.length);
+      buf.writeBytes(nameBytes);
+    }
 
     nbtTag.encode(buf);
   }

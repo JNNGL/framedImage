@@ -46,7 +46,7 @@ public class TagCompound extends NbtTag implements Iterable<NbtTag> {
   @Override
   public void encode(ByteBuf buf) {
     if (value != null) {
-      value.values().forEach(tag -> Nbt.write(buf, tag));
+      value.values().forEach(tag -> Nbt.write(buf, tag, false));
     }
 
     buf.writeByte(0);
