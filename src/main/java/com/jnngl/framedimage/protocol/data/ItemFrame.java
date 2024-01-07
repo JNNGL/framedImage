@@ -37,6 +37,7 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_19, 45)
           .add(MinecraftVersion.MINECRAFT_1_19_3, 46)
           .add(MinecraftVersion.MINECRAFT_1_19_4, 56)
+          .add(MinecraftVersion.MINECRAFT_1_20_3, 57)
           .build();
 
   private static final IdMapping GLOWING_ID_MAPPING =
@@ -49,6 +50,7 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_19, 35)
           .add(MinecraftVersion.MINECRAFT_1_19_3, 36)
           .add(MinecraftVersion.MINECRAFT_1_19_4, 43)
+          .add(MinecraftVersion.MINECRAFT_1_20_3, 44)
           .build();
 
   private static final IdMapping METADATA_INDEX_MAPPING =
