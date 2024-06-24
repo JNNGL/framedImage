@@ -38,6 +38,7 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_19_3, 46)
           .add(MinecraftVersion.MINECRAFT_1_19_4, 56)
           .add(MinecraftVersion.MINECRAFT_1_20_3, 57)
+          .add(MinecraftVersion.MINECRAFT_1_20_5, 60)
           .build();
 
   private static final IdMapping GLOWING_ID_MAPPING =
@@ -51,6 +52,7 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_19_3, 36)
           .add(MinecraftVersion.MINECRAFT_1_19_4, 43)
           .add(MinecraftVersion.MINECRAFT_1_20_3, 44)
+          .add(MinecraftVersion.MINECRAFT_1_20_5, 47)
           .build();
 
   private static final IdMapping METADATA_INDEX_MAPPING =
@@ -87,7 +89,7 @@ public class ItemFrame {
       return new EntityMetadata(
           Map.of(
               getMetadataIndex(protocolVersion),
-              new EntityMetadata.SlotEntry(FilledMap::getID, 1, 0,
+              new EntityMetadata.SlotEntry(FilledMap::getID, 1, mapId,
                   new TagCompound("",
                       Collections.singleton(new TagInt("map", mapId))
                   )

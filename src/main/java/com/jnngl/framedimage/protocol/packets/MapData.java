@@ -42,6 +42,7 @@ public class MapData implements Packet {
           .add(MinecraftVersion.MINECRAFT_1_19_3, 0x25)
           .add(MinecraftVersion.MINECRAFT_1_19_4, 0x29)
           .add(MinecraftVersion.MINECRAFT_1_20_2, 0x2A)
+          .add(MinecraftVersion.MINECRAFT_1_20_5, 0x2C)
           .build();
 
   private final int mapID;

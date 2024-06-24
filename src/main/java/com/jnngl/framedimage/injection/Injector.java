@@ -94,7 +94,7 @@ public class Injector {
       consoleField.setAccessible(true);
       Object minecraftServer = consoleField.get(server);
       Field connectionField = findField(minecraftServer.getClass(),
-          field -> field.getType().getSimpleName().equals("ServerConnection"));
+          field -> field.getType().getSimpleName().startsWith("ServerConnection"));
       connection = connectionField.get(minecraftServer);
 
       for (Field field : connection.getClass().getDeclaredFields()) {

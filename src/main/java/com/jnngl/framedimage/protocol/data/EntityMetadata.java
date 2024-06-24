@@ -61,6 +61,16 @@ public class EntityMetadata {
 
     @Override
     public void encode(ByteBuf buf, MinecraftVersion protocolVersion) {
+      if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_20_5) >= 0) {
+        ProtocolUtils.writeVarInt(buf, 1);
+        ProtocolUtils.writeVarInt(buf, item.apply(protocolVersion));
+        ProtocolUtils.writeVarInt(buf, 1);
+        ProtocolUtils.writeVarInt(buf, 0);
+        ProtocolUtils.writeVarInt(buf, 26);
+        ProtocolUtils.writeVarInt(buf, this.data);
+        return;
+      }
+
       if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_13_2) >= 0) {
         buf.writeBoolean(present);
       }
