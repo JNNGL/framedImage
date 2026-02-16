@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,9 @@ public class SetMetadata implements Packet {
           .add(MinecraftVersion.MINECRAFT_1_20_2, 0x54)
           .add(MinecraftVersion.MINECRAFT_1_20_3, 0x56)
           .add(MinecraftVersion.MINECRAFT_1_20_5, 0x58)
+          .add(MinecraftVersion.MINECRAFT_1_21_2, 0x5D)
+          .add(MinecraftVersion.MINECRAFT_1_21_5, 0x5C)
+          .add(MinecraftVersion.MINECRAFT_1_21_9, 0x61)
           .build();
 
   private final int entityId;

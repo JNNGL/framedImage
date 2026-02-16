@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package com.jnngl.framedimage.protocol.data;
 import com.jnngl.framedimage.protocol.data.nbt.Nbt;
 import com.jnngl.framedimage.protocol.data.nbt.NbtTag;
 import io.netty.buffer.ByteBuf;
+import com.jnngl.framedimage.protocol.IdMapping;
 import com.jnngl.framedimage.protocol.MinecraftVersion;
 import com.jnngl.framedimage.protocol.ProtocolUtils;
 
@@ -36,6 +37,14 @@ public class EntityMetadata {
   }
 
   public static class SlotEntry implements Entry {
+
+    private static final IdMapping MAP_ID_COMPONENT_MAPPING =
+        new IdMapping()
+            .add(MinecraftVersion.MINECRAFT_1_20_5, 26)
+            .add(MinecraftVersion.MINECRAFT_1_21_2, 36)
+            .add(MinecraftVersion.MINECRAFT_1_21_5, 37)
+            .add(MinecraftVersion.MINECRAFT_1_21_11, 44)
+            .build();
 
     private final boolean present;
     private final Function<MinecraftVersion, Integer> item;
@@ -62,11 +71,16 @@ public class EntityMetadata {
     @Override
     public void encode(ByteBuf buf, MinecraftVersion protocolVersion) {
       if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_20_5) >= 0) {
-        ProtocolUtils.writeVarInt(buf, 1);
+        if (!present) {
+          ProtocolUtils.writeVarInt(buf, 0);
+          return;
+        }
+
+        ProtocolUtils.writeVarInt(buf, count);
         ProtocolUtils.writeVarInt(buf, item.apply(protocolVersion));
         ProtocolUtils.writeVarInt(buf, 1);
         ProtocolUtils.writeVarInt(buf, 0);
-        ProtocolUtils.writeVarInt(buf, 26);
+        ProtocolUtils.writeVarInt(buf, MAP_ID_COMPONENT_MAPPING.getID(protocolVersion));
         ProtocolUtils.writeVarInt(buf, this.data);
         return;
       }

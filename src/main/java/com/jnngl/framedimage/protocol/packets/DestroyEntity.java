@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,6 +42,9 @@ public class DestroyEntity implements Packet {
           .add(MinecraftVersion.MINECRAFT_1_19_4, 0x3E)
           .add(MinecraftVersion.MINECRAFT_1_20_2, 0x40)
           .add(MinecraftVersion.MINECRAFT_1_20_5, 0x42)
+          .add(MinecraftVersion.MINECRAFT_1_21_2, 0x47)
+          .add(MinecraftVersion.MINECRAFT_1_21_5, 0x46)
+          .add(MinecraftVersion.MINECRAFT_1_21_9, 0x4B)
           .build();
 
   private final int entity;
