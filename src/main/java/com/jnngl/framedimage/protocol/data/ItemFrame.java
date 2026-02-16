@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,11 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_19_4, 56)
           .add(MinecraftVersion.MINECRAFT_1_20_3, 57)
           .add(MinecraftVersion.MINECRAFT_1_20_5, 60)
+          .add(MinecraftVersion.MINECRAFT_1_21_2, 71)
+          .add(MinecraftVersion.MINECRAFT_1_21_4, 70)
+          .add(MinecraftVersion.MINECRAFT_1_21_6, 71)
+          .add(MinecraftVersion.MINECRAFT_1_21_9, 72)
+          .add(MinecraftVersion.MINECRAFT_1_21_11, 73)
           .build();
 
   private static final IdMapping GLOWING_ID_MAPPING =
@@ -53,6 +58,11 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_19_4, 43)
           .add(MinecraftVersion.MINECRAFT_1_20_3, 44)
           .add(MinecraftVersion.MINECRAFT_1_20_5, 47)
+          .add(MinecraftVersion.MINECRAFT_1_21_2, 58)
+          .add(MinecraftVersion.MINECRAFT_1_21_4, 57)
+          .add(MinecraftVersion.MINECRAFT_1_21_6, 58)
+          .add(MinecraftVersion.MINECRAFT_1_21_9, 59)
+          .add(MinecraftVersion.MINECRAFT_1_21_11, 60)
           .build();
 
   private static final IdMapping METADATA_INDEX_MAPPING =
@@ -63,6 +73,7 @@ public class ItemFrame {
           .add(MinecraftVersion.MINECRAFT_1_10, 6)
           .add(MinecraftVersion.MINECRAFT_1_14, 7)
           .add(MinecraftVersion.MINECRAFT_1_17, 8)
+          .add(MinecraftVersion.MINECRAFT_1_21_6, 9)
           .build();
 
   public static int getID(MinecraftVersion protocolVersion) {

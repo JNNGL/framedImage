@@ -2,6 +2,8 @@
 
 High performance Bukkit/Folia plugin for map-arts.
 
+Requires Java 21+.
+
 <b>Features</b>:
 <ul>
 <li><b>Performance.</b> The plugin inserts thousands of frames in just a few seconds (during testing, the plugin inserted ~3000 frames in 2 seconds)</li>

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,11 @@ public class FilledMap {
           .add(MinecraftVersion.MINECRAFT_1_20, 941)
           .add(MinecraftVersion.MINECRAFT_1_20_3, 979)
           .add(MinecraftVersion.MINECRAFT_1_20_5, 982)
+          .add(MinecraftVersion.MINECRAFT_1_21_2, 1022)
+          .add(MinecraftVersion.MINECRAFT_1_21_4, 1031)
+          .add(MinecraftVersion.MINECRAFT_1_21_5, 1042)
+          .add(MinecraftVersion.MINECRAFT_1_21_6, 1059)
+          .add(MinecraftVersion.MINECRAFT_1_21_9, 1104)
           .build();
 
   public static int getID(MinecraftVersion version) {

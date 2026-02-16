@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,7 +63,14 @@ public enum MinecraftVersion {
   MINECRAFT_1_20_2(764),
   MINECRAFT_1_20_3(765),
   MINECRAFT_1_20_5(766),
-  MINECRAFT_1_21(767);
+  MINECRAFT_1_21(767),
+  MINECRAFT_1_21_2(768),
+  MINECRAFT_1_21_4(769),
+  MINECRAFT_1_21_5(770),
+  MINECRAFT_1_21_6(771),
+  MINECRAFT_1_21_7(772),
+  MINECRAFT_1_21_9(773),
+  MINECRAFT_1_21_11(774);
 
   public static final MinecraftVersion MINIMUM_VERSION = MINECRAFT_1_7_2;
   public static final MinecraftVersion MAXIMUM_VERSION = values()[values().length - 1];

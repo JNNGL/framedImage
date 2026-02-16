@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,9 @@ public class MapData implements Packet {
           .add(MinecraftVersion.MINECRAFT_1_19_4, 0x29)
           .add(MinecraftVersion.MINECRAFT_1_20_2, 0x2A)
           .add(MinecraftVersion.MINECRAFT_1_20_5, 0x2C)
+          .add(MinecraftVersion.MINECRAFT_1_21_2, 0x2D)
+          .add(MinecraftVersion.MINECRAFT_1_21_5, 0x2C)
+          .add(MinecraftVersion.MINECRAFT_1_21_9, 0x31)
           .build();
 
   private final int mapID;

@@ -1,10 +1,10 @@
 plugins {
   id 'java'
-  id 'com.github.johnrengelman.shadow' version '7.1.2'
+  id 'com.gradleup.shadow' version '9.3.1'
 }
 
 group = 'com.jnngl'
-version = '1.8.0'
+version = '1.8.1'
 
 repositories {
   mavenCentral()
@@ -21,14 +21,14 @@ repositories {
 dependencies {
   implementation 'net.elytrium:elytrium-java-commons:1.0.8'
   implementation 'com.jnngl:mapcolor:1.0.1'
-  implementation 'org.bstats:bstats-bukkit:3.0.0'
+  implementation 'org.bstats:bstats-bukkit:3.1.0'
 
-  compileOnly 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
+  compileOnly 'dev.folia:folia-api:1.21.11-R0.1-SNAPSHOT'
 
-  compileOnly 'io.netty:netty-all:4.1.85.Final'
+  compileOnly 'io.netty:netty-all:4.2.10.Final'
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
   def javaVersion = JavaVersion.toVersion(targetJavaVersion)
   sourceCompatibility = javaVersion
@@ -47,14 +47,14 @@ tasks.withType(JavaCompile).configureEach {
 processResources {
   def props = [version: version]
   inputs.properties props
-  filteringCharset 'UTF-8'
+  filteringCharset = 'UTF-8'
   filesMatching('plugin.yml') {
     expand props
   }
 }
 
 shadowJar {
-  getArchiveClassifier() set ''
+  archiveClassifier.set('')
 
   relocate 'org.bstats', 'com.jnngl.framedimage.thirdparty.org.bstats'
 }

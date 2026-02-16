@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2022  JNNGL
+ *  Copyright (C) 2022-2026  JNNGL
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package com.jnngl.framedimage.protocol.packets;
 
 import io.netty.buffer.ByteBuf;
 import com.jnngl.framedimage.protocol.IdMapping;
+import com.jnngl.framedimage.protocol.LpVec3Codec;
 import com.jnngl.framedimage.protocol.MinecraftVersion;
 import com.jnngl.framedimage.protocol.Packet;
 import com.jnngl.framedimage.protocol.ProtocolUtils;
@@ -86,6 +87,11 @@ public class SpawnEntity implements Packet {
       buf.writeInt((int) (positionY * 32.0));
       buf.writeInt((int) (positionZ * 32.0));
     }
+
+    if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_21_9) >= 0) {
+      LpVec3Codec.write(buf, velocityX, velocityY, velocityZ);
+    }
+
     buf.writeByte((int) (pitch * (256.0F / 360.0F)));
     buf.writeByte((int) (yaw * (256.0F / 360.0F)));
     if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_18_2) > 0) {
@@ -94,9 +100,12 @@ public class SpawnEntity implements Packet {
     } else {
       buf.writeInt(data.apply(protocolVersion));
     }
-    buf.writeShort((int) (velocityX * 8000.0F));
-    buf.writeShort((int) (velocityY * 8000.0F));
-    buf.writeShort((int) (velocityZ * 8000.0F));
+
+    if (protocolVersion.compareTo(MinecraftVersion.MINECRAFT_1_21_9) < 0) {
+      buf.writeShort((int) (velocityX * 8000.0F));
+      buf.writeShort((int) (velocityY * 8000.0F));
+      buf.writeShort((int) (velocityZ * 8000.0F));
+    }
   }
 
   @Override
